@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Generador de Imágenes IA - Fabian Navas</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a, #000000);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      max-width: 800px;
+      margin-bottom: 48px;
+    }
+
+    header h1 {
+      font-weight: 700;
+      font-size: 3.25rem;
+      background: linear-gradient(90deg, #ff6700, #ff9e1b, #ff6700);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 3px;
+      margin-bottom: 16px;
+      user-select: none;
+      animation: fadeInDown 1s ease forwards;
+    }
+
+    header p {
+      font-weight: 400;
+      font-size: 1.15rem;
+      color: #ffbb7ddd;
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 1.2s ease forwards;
+    }
+
+    .main-container {
+      background: rgba(255 103 0 / 0.12);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      box-shadow: 0 0 40px rgb(255 103 0 / 0.3);
+      padding: 32px 32px 48px;
+      max-width: 640px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      animation: fadeIn 1s ease forwards;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 140px;
+      border-radius: 16px;
+      border: none;
+      padding: 18px 20px;
+      font-size: 1.2rem;
+      font-family: 'Poppins', sans-serif;
+      color: #ffe8cc;
+      background: rgba(255 106 0 / 0.15);
+      outline-offset: 3px;
+      outline-color: #ff8b29;
+      resize: vertical;
+      box-shadow: 0 0 12px 0 transparent;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      caret-color: #ffae5d;
+    }
+    textarea::placeholder {
+      color: #ffc38cbb;
+      font-weight: 500;
+    }
+    textarea:focus {
+      background: rgba(255 106 0 / 0.3);
+      box-shadow: 0 0 25px 8px #ff6700bb;
+    }
+
+    button {
+      background: linear-gradient(145deg, #ff6700, #fca326);
+      border: none;
+      text-transform: uppercase;
+      font-weight: 700;
+      font-size: 1.35rem;
+      padding: 16px 0;
+      border-radius: 20px;
+      color: #1a1a1a;
+      cursor: pointer;
+      transition: background 0.4s ease, transform 0.3s ease, box-shadow 0.4s ease;
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 2px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 12px 36px rgb(255 98 0 / 0.6);
+      user-select: none;
+    }
+    button:hover:not(:disabled) {
+      background: linear-gradient(145deg, #ffa639, #ffc162);
+      box-shadow: 0 18px 48px rgb(255 128 0 / 0.9);
+      transform: scale(1.07);
+    }
+    button:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    button:disabled {
+      cursor: not-allowed;
+      box-shadow: none;
+      filter: brightness(0.75);
+    }
+
+    .material-icons {
+      font-size: 28px;
+      color: #1a1a1a;
+    }
+
+    .output {
+      min-height: 340px;
+      position: relative;
+      background: rgba(255 103 0 / 0.12);
+      border-radius: 20px;
+      box-shadow: 0 10px 36px rgb(255 123 0 / 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      padding: 16px;
+      user-select: none;
+    }
+
+    .output img {
+      width: 100%;
+      max-width: 512px;
+      border-radius: 20px;
+      box-shadow: 0 16px 60px rgb(107 44 0 / 0.65);
+      animation: popIn 0.5s ease forwards;
+    }
+
+    .loading {
+      position: absolute;
+      inset: 0;
+      background: rgba(0 0 0 / 0.35);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 900;
+      font-size: 1.4rem;
+      color: #ffab5c;
+      letter-spacing: 0.1em;
+      animation: pulse 1.6s infinite;
+      user-select: none;
+    }
+
+    .error-message {
+      margin: 0 auto -10px auto;
+      color: #ff6c6c;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-align: center;
+      text-shadow: 0 0 7px red;
+      animation: shake 0.3s ease;
+      user-select: none;
+    }
+
+    footer {
+      margin-top: 48px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #ffa64dcc;
+      user-select: none;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      text-align: center;
+      text-shadow: 0 0 8px #ff6a00cc;
+      animation: fadeInUp 2.4s ease forwards;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-25px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(25px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.85);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.4;
+      }
+    }
+    @keyframes shake {
+      0%, 100% {
+        transform: translateX(0);
+      }
+      25% {
+        transform: translateX(-5px);
+      }
+      50% {
+        transform: translateX(5px);
+      }
+      75% {
+        transform: translateX(-5px);
+      }
+    }
+
+    @media (max-width: 640px) {
+      header h1 {
+        font-size: 2.5rem;
+        letter-spacing: 2px;
+      }
+      textarea {
+        font-size: 1rem;
+        min-height: 120px;
+      }
+      button {
+        font-size: 1.2rem;
+        padding: 14px 0;
+      }
+      .output {
+        min-height: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Generador de Imágenes IA</h1>
+    <p>Describe tu idea y crea imágenes sorprendentes con inteligencia artificial.</p>
+  </header>
+
+  <main class="main-container">
+    <textarea id="prompt" placeholder="Ejemplo: Un paisaje surrealista con montañas flotantes al atardecer"></textarea>
+    <button id="generate-btn" aria-live="polite" aria-busy="false" type="button" aria-label="Crear imagen">
+      <span class="material-icons" aria-hidden="true">auto_awesome</span> Crear Imagen
+    </button>
+
+    <div class="error-message" id="error-msg" role="alert" aria-live="assertive" hidden></div>
+
+    <div class="output" aria-live="polite" aria-atomic="true" aria-relevant="additions" aria-label="Imagen generada automáticamente">
+      <!-- Aquí aparecerá la imagen generada -->
+    </div>
+  </main>
+
+  <footer>Creado por Fabian Navas</footer>
+
+  <script>
+    (function () {
+      const BACKEND_API_URL = '/api/generate-image'; // Ajusta si usas otro dominio
+
+      const promptInput = document.getElementById('prompt');
+      const generateBtn = document.getElementById('generate-btn');
+      const errorMsg = document.getElementById('error-msg');
+      const outputDiv = document.querySelector('.output');
+
+      function clearOutput() {
+        outputDiv.innerHTML = '';
+        errorMsg.hidden = true;
+        errorMsg.textContent = '';
+      }
+
+      function showLoading(text = 'Generando...') {
+        clearOutput();
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading';
+        loadingDiv.textContent = text;
+        outputDiv.appendChild(loadingDiv);
+      }
+
+      function showImage(url) {
+        clearOutput();
+        const img = document.createElement('img');
+        img.src = url;
+        img.alt = `Imagen generada para el prompt: "${promptInput.value.trim()}"`;
+        img.loading = 'lazy';
+        img.onerror = () => {
+          errorMsg.textContent = 'Error al cargar la imagen.';
+          errorMsg.hidden = false;
+        };
+        outputDiv.appendChild(img);
+      }
+
+      function showError(message) {
+        clearOutput();
+        errorMsg.textContent = message;
+        errorMsg.hidden = false;
+      }
+
+      generateBtn.addEventListener('click', async () => {
+        clearOutput();
+        const prompt = promptInput.value.trim();
+        if (!prompt) {
+          showError('Por favor, escribe una descripción para generar la imagen.');
+          return;
+        }
+
+        generateBtn.disabled = true;
+        generateBtn.setAttribute('aria-busy', 'true');
+        generateBtn.innerHTML = '<span class="material-icons" aria-hidden="true">autorenew</span> Generando...';
+
+        try {
+          showLoading('Generando prompt con ChatGPT...');
+          // Llama al backend para obtener prompt y generar imagen (backend debe estar desplegado)
+          const response = await fetch(BACKEND_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt }),
+          });
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error desconocido');
+          }
+          const data = await response.json();
+          showImage(data.imageUrl);
+        } catch (err) {
+          showError(`Error: ${err.message}`);
+        } finally {
+          generateBtn.disabled = false;
+          generateBtn.setAttribute('aria-busy', 'false');
+          generateBtn.innerHTML = '<span class="material-icons" aria-hidden="true">auto_awesome</span> Crear Imagen';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+

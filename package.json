@@ -1,0 +1,7 @@
+{
+  "name": "fabian-image-generator",
+  "version": "1.0.0",
+  "dependencies": {
+    "openai": "^4.7.0"
+  }
+}

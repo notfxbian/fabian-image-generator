@@ -19,7 +19,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ message: 'Error generando imagen' });
     }
 
-    // La API de HF devuelve imagen en base64 en el cuerpo
     const buffer = await response.arrayBuffer();
     const base64 = Buffer.from(buffer).toString('base64');
     const dataUrl = `data:image/png;base64,${base64}`;
@@ -29,4 +28,3 @@ export default async function handler(req, res) {
     res.status(500).json({ message: error.message || 'Error interno' });
   }
 }
-

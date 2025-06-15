@@ -1,7 +1,5 @@
 import fetch from 'node-fetch';
 
-const DEEPAI_API_KEY = process.env.DEEPAI_API_KEY; // Configura esta variable en Vercel
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -11,31 +9,29 @@ export default async function handler(req, res) {
     const { prompt } = req.body;
     if (!prompt) return res.status(400).json({ message: 'El prompt es requerido' });
 
-    const response = await fetch('https://api.deepai.org/api/text2img', {
+    // Llamada a la API no oficial de Craiyon (puede variar en disponibilidad)
+    const response = await fetch('https://api.craiyon.com/generate', {
       method: 'POST',
-      headers: {
-        'Api-Key': DEEPAI_API_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ text: prompt })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
     });
 
     if (!response.ok) {
-      const data = await response.json();
-      return res.status(500).json({ message: data.err || 'Error generando imagen' });
+      return res.status(500).json({ message: 'Error generando imagen' });
     }
 
     const data = await response.json();
 
-    // La API responde con un campo 'output_url' con la url de la imagen generada
-    const imageUrl = data.output_url;
-    if (!imageUrl) {
-      return res.status(500).json({ message: 'No se obtuvo URL de imagen' });
+    // data.images contiene array con imágenes codificadas en base64 sin encabezado 'data:image/png;base64,'
+    if (!data.images || data.images.length === 0) {
+      return res.status(500).json({ message: 'No se recibieron imágenes' });
     }
 
-    return res.status(200).json({ imageUrl });
+    // Construimos URL base64 de la primera imagen
+    const imageUrl = 'data:image/png;base64,' + data.images[0];
 
+    res.status(200).json({ imageUrl });
   } catch (error) {
-    return res.status(500).json({ message: error.message || 'Error interno' });
+    res.status(500).json({ message: error.message || 'Error interno' });
   }
 }
